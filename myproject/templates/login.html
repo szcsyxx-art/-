@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - 我的网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form method="post" action="/login" id="loginForm">
+            <h2 class="text-center mb-4">登录</h2>
+
+            <div class="mb-3">
+                <label for="username" class="form-label">用户名</label>
+                <input type="text" class="form-control bg-dark text-light border-secondary" name="username"
+                    id="username" aria-describedby="usernameHelp" placeholder="请输入用户名" />
+                <small id="usernameHelp" class="form-text text-muted">用户名长度3-20个字符</small>
+            </div>
+
+            <div class="mb-3">
+                <label for="pwd" class="form-label">密码</label>
+                <input type="password" class="form-control bg-dark text-light border-secondary" name="pwd"
+                    id="pwd" aria-describedby="pwdHelp" placeholder="请输入密码" />
+                <small id="pwdHelp" class="form-text text-muted">密码必须不少于8位</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">确认登录</button>
+            
+            {% if error %}
+                <div class="alert alert-danger mt-3">{{ error }}</div>
+            {% endif %}
+
+            <div class="text-center mt-3">
+                <a href="/register" class="text-light">还没有账号？立即注册</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// 获取输入框和提示元素
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('pwd');
+    const usernameHelp = document.getElementById('usernameHelp');
+    const passwordHelp = document.getElementById('pwdHelp');
+    const loginForm = document.getElementById('loginForm');
+
+    // 用户名实时验证
+    usernameInput.addEventListener('input', function () {
+        const username = this.value;
+
+        if (username.length === 0) {
+            usernameHelp.innerHTML = '请输入用户名';
+            usernameHelp.className = 'form-text text-muted';
+        } else if (username.length < 3) {
+            usernameHelp.innerHTML = '❌ 用户名太短（至少3个字符）';
+            usernameHelp.className = 'form-text text-danger';
+        } else if (username.length > 20) {
+            usernameHelp.innerHTML = '❌ 用户名太长（最多20个字符）';
+            usernameHelp.className = 'form-text text-danger';
+        } else {
+            usernameHelp.innerHTML = '✅ 用户名格式正确';
+            usernameHelp.className = 'form-text text-success';
+        }
+    });
+
+    // 密码实时验证
+    passwordInput.addEventListener('input', function () {
+        const password = this.value;
+
+        if (password.length === 0) {
+            passwordHelp.innerHTML = '请输入密码';
+            passwordHelp.className = 'form-text text-muted';
+        } else if (password.length < 8) {
+            passwordHelp.innerHTML = '❌ 密码太短（至少8个字符）';
+            passwordHelp.className = 'form-text text-danger';
+        } else {
+            passwordHelp.innerHTML = '✅ 密码长度符合要求';
+            passwordHelp.className = 'form-text text-success';
+        }
+    });
+
+    // 表单提交前的最终验证
+    loginForm.addEventListener('submit', function (e) {
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+        let isValid = true;
+
+        // 验证用户名
+        if (username.length < 3 || username.length > 20) {
+            usernameHelp.innerHTML = '❌ 用户名长度必须在3-20个字符之间';
+            usernameHelp.className = 'form-text text-danger';
+            isValid = false;
+        }
+
+        // 验证密码
+        if (password.length < 8) {
+            passwordHelp.innerHTML = '❌ 密码必须不少于8位';
+            passwordHelp.className = 'form-text text-danger';
+            isValid = false;
+        }
+
+        // 如果验证不通过，阻止表单提交
+        if (!isValid) {
+            e.preventDefault();
+            alert('请检查输入是否正确！');
+        }
+    });
+
+    // 页面加载时初始化提示
+    usernameHelp.innerHTML = '用户名长度3-20个字符';
+    passwordHelp.innerHTML = '密码必须不少于8位';
+</script>
+
+{% endblock %}

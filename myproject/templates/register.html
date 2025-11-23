@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}注册 - 我的网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="text-center mb-4">用户注册</h2>
+        
+        <form method="post" action="/register" id="registerForm">
+            <!-- 用户名输入 -->
+            <div class="mb-3">
+                <label for="username" class="form-label">用户名</label>
+                <input
+                    type="text" 
+                    class="form-control bg-dark text-light border-secondary"
+                    name="username" 
+                    id="username"
+                    placeholder="请输入用户名"
+                    required
+                />
+                <small id="usernameHelp" class="form-text text-muted">用户名长度3-20个字符</small>
+            </div>
+
+            <!-- 密码输入 -->
+            <div class="mb-3">
+                <label for="password" class="form-label">密码</label>
+                <input
+                    type="password" 
+                    class="form-control bg-dark text-light border-secondary"
+                    name="pwd" 
+                    id="password"
+                    placeholder="请输入密码"
+                    required
+                />
+                <small id="passwordHelp" class="form-text text-muted">密码必须不少于8位</small>
+            </div>
+
+            <!-- 确认密码 -->
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">确认密码</label>
+                <input
+                    type="password" 
+                    class="form-control bg-dark text-light border-secondary"
+                    name="confirm_pwd" 
+                    id="confirm_password"
+                    placeholder="请再次输入密码"
+                    required
+                />
+                <small id="confirmPasswordHelp" class="form-text text-muted">请再次输入密码确保一致</small>
+            </div>
+                    
+            <!-- 提交按钮 -->
+            <button type="submit" class="btn btn-primary w-100">注册账号</button>
+            <span style="color:red;">{{error}}</span>
+                    
+            <!-- 登录链接 -->
+            <div class="text-center mt-3">
+                <a href="/login" class="text-light">已有账号？立即登录</a>
+            
+            {% if error %}
+                <div class="alert alert-danger mt-3">{{ error }}</div>
+            {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript代码保持不变 -->
+<!-- 实时验证JavaScript -->
+<script>
+    // 获取所有输入框和提示元素
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirm_password');
+    const usernameHelp = document.getElementById('usernameHelp');
+    const passwordHelp = document.getElementById('passwordHelp');
+    const confirmPasswordHelp = document.getElementById('confirmPasswordHelp');
+    const registerForm = document.getElementById('registerForm');
+
+    // 防抖函数，避免频繁请求
+    let checkUsernameTimeout;
+    function debounceCheckUsername(username) {
+        clearTimeout(checkUsernameTimeout);
+        checkUsernameTimeout = setTimeout(() => {
+            checkUsernameAvailability(username);
+        }, 500); // 用户停止输入500ms后检查
+    }
+
+    // 检查用户名可用性
+    function checkUsernameAvailability(username) {
+        if (username.length < 3 || username.length > 20) {
+            return; // 长度不符合要求，不检查
+        }
+
+        // 显示加载状态
+        usernameHelp.innerHTML = '🔍 检查用户名可用性...';
+        usernameHelp.className = 'form-text text-warning';
+
+        // 发送AJAX请求到后端
+        fetch('/api/check_username', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: username })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.available) {
+                usernameHelp.innerHTML = '✅ 用户名可用';
+                usernameHelp.className = 'form-text text-success';
+            } else {
+                usernameHelp.innerHTML = data.message;
+                usernameHelp.className = 'form-text text-danger';
+            }
+        })
+        .catch(error => {
+            console.error('检查用户名时出错:', error);
+            usernameHelp.innerHTML = '⚠️ 检查失败，请重试';
+            usernameHelp.className = 'form-text text-warning';
+        });
+    }
+
+    // 用户名实时验证
+    usernameInput.addEventListener('input', function() {
+        const username = this.value;
+            
+        if (username.length === 0) {
+            usernameHelp.innerHTML = '请输入用户名';
+            usernameHelp.className = 'form-text text-muted';
+        } else if (username.length < 3) {
+            usernameHelp.innerHTML = '❌ 用户名太短（至少3个字符）';
+            usernameHelp.className = 'form-text text-danger';
+        } else if (username.length > 20) {
+            usernameHelp.innerHTML = '❌ 用户名太长（最多20个字符）';
+            usernameHelp.className = 'form-text text-danger';
+        } else {
+            usernameHelp.innerHTML = '✅ 用户名格式正确，检查可用性...';
+            usernameHelp.className = 'form-text text-success';
+            // 🆕 触发用户名可用性检查
+            debounceCheckUsername(username);
+        }
+    });
+
+    // 密码实时验证
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+            
+        if (password.length === 0) {
+            passwordHelp.innerHTML = '请输入密码';
+            passwordHelp.className = 'form-text text-muted';
+        } else if (password.length < 8) {
+            passwordHelp.innerHTML = '❌ 密码太短（至少8个字符）';
+            passwordHelp.className = 'form-text text-danger';
+        } else {
+            passwordHelp.innerHTML = '✅ 密码长度符合要求';
+            passwordHelp.className = 'form-text text-success';
+        }
+            
+        // 触发确认密码的重新验证
+        confirmPasswordInput.dispatchEvent(new Event('input'));
+    });
+
+    // 确认密码实时验证
+    confirmPasswordInput.addEventListener('input', function() {
+        const password = passwordInput.value;
+        const confirmPassword = this.value;
+            
+        if (confirmPassword.length === 0) {
+            confirmPasswordHelp.innerHTML = '请再次输入密码';
+            confirmPasswordHelp.className = 'form-text text-muted';
+        } else if (password !== confirmPassword) {
+            confirmPasswordHelp.innerHTML = '❌ 两次输入的密码不一致';
+            confirmPasswordHelp.className = 'form-text text-danger';
+        } else if (password.length >= 8) {
+            confirmPasswordHelp.innerHTML = '✅ 密码一致';
+            confirmPasswordHelp.className = 'form-text text-success';
+        } else {
+            confirmPasswordHelp.innerHTML = '⚠️ 密码一致，但主密码长度不足';
+            confirmPasswordHelp.className = 'form-text text-warning';
+        }
+    });
+
+    // 表单提交前的最终验证
+    registerForm.addEventListener('submit', function(e) {
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        let isValid = true;
+
+        submitButton.disabled = true;
+        submitButton.innerHTML = 
+        '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 处理中...';
+
+        // 验证用户名
+        if (username.length < 3 || username.length > 20) {
+            usernameHelp.innerHTML = '❌ 用户名长度必须在3-20个字符之间';
+            usernameHelp.className = 'form-text text-danger';
+            isValid = false;
+        }
+
+        // 验证密码
+        if (password.length < 8) {
+            passwordHelp.innerHTML = '❌ 密码必须不少于8位';
+            passwordHelp.className = 'form-text text-danger';
+            isValid = false;
+        }
+
+        // 验证密码一致性
+        if (password !== confirmPassword) {
+            confirmPasswordHelp.innerHTML = '❌ 两次输入的密码不一致';
+            confirmPasswordHelp.className = 'form-text text-danger';
+            isValid = false;
+        }
+
+        // 如果验证不通过，阻止表单提交
+        if (!isValid) {
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+            e.preventDefault();
+            alert('请检查输入是否正确！');
+        }
+    });
+
+    // 页面加载时初始化提示
+    usernameHelp.innerHTML = '用户名长度3-20个字符';
+    passwordHelp.innerHTML = '密码必须不少于8位';
+    confirmPasswordHelp.innerHTML = '请再次输入密码确保一致';
+
+
+    // 在注册页面的密码验证中添加强度检查
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+        return strength;
+    }
+
+    // 在密码输入事件中
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        const strength = checkPasswordStrength(password);
+    
+        // 根据强度显示不同提示
+        const messages = ['', '弱', '一般', '良好', '强', '很强'];
+        const colors = ['muted', 'danger', 'warning', 'info', 'success', 'success'];
+    
+        if (password.length === 0) {
+            passwordHelp.innerHTML = '请输入密码';
+            passwordHelp.className = 'form-text text-muted';
+        } else if (password.length < 8) {
+            passwordHelp.innerHTML = '❌ 密码太短（至少8个字符）';
+            passwordHelp.className = 'form-text text-danger';
+        } else {
+            passwordHelp.innerHTML = `✅ 密码强度：${messages[strength]}`;
+            passwordHelp.className = `form-text text-${colors[strength]}`;
+        }
+    });
+</script>
+{% endblock %}

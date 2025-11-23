@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}个人资料 - 我的网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="text-center mb-4">个人资料</h2>
+        
+        <div class="card bg-dark text-light">
+            <div class="card-body">
+                <h5 class="card-title">👤 用户信息</h5>
+                
+                <form action="/change_username" method="post">
+                    <!-- 显示用户信息修改表单 -->
+                    <div class="mb-3">
+                        <strong>用户名:</strong>
+                        <div class="mb-3">
+                            <label for="" class="form-label"></label>
+                            <input class="form-control" name="new_username"
+                                id="new_username" rows="1" value="{{ username }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">确认修改</button>
+                    </div>
+                </form>
+                
+                
+                <div class="mb-3">
+                    <strong>UID:</strong> {{ userid }}
+                </div>
+                <div class="mb-3">
+                    <strong>登录时间:</strong> {{ session.get('login_time', '未知') }}
+                </div>
+                <div class="mb-3">
+                    <strong>登录次数:</strong> {{ session.get('login_count', 1) }}
+                </div>
+                
+                <hr>
+                
+                <!-- 头像显示和上传 -->
+                <div class="mb-3">
+                    <strong>头像</strong>
+                    <div class="text-center my-3">
+                        {% if profile_picture_path %}
+                            <img src="{{ profile_picture_path }}"
+                                 class="img-fluid rounded"
+                                 style="max-height: 200px; max-width: 200px;"
+                                 alt="用户头像">
+                        {% else %}
+                            <div class="text-muted py-4">暂无头像</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- 上传头像表单 -->
+                    <form action="{{ url_for('account.upload_image') }}" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="image" class="form-label">选择新头像：</label>
+                            <input type="file" id="image" name="image" class="form-control" 
+                                   accept="image/*" required>
+                            <div class="form-text text-light">支持 JPG, PNG, GIF 格式</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">上传头像</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="mt-4 text-center">
+            <a href="/home" class="btn btn-primary">返回首页</a>
+            <a href="/logout" class="btn btn-outline-danger">退出登录</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

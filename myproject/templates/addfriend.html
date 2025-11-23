@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}添加好友 - 我的网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <a class="btn btn-primary" href="/friend_list"><--返回</a>
+        <h2 class="text-center">添加好友</h2>
+        
+        <!-- 搜索表单 -->
+        <form action="/addfriend" method="post">
+            <div class="d-flex align-items-center mb-3">
+                <input
+                    type="text"
+                    class="form-control w-100"
+                    name="search"
+                    id="search"
+                    placeholder="搜索要添加为好友的用户名..."
+                    value="{{ request.form.search if request.form }}"
+                    required
+                />
+                <button type="submit" class="btn btn-outline-secondary ms-2">🔍</button>
+            </div>
+        </form>
+        
+        {% if user_list %}
+            {% if user_list == "get" %}
+                <!-- 如果是get请求，直接留白 -->
+            {% else %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">搜索结果</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for user in user_list %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ user }}
+                                    <form action="/add_friend_action" method="post" style="display: inline;">
+                                        <input type="hidden" name="friend_username" value="{{ user }}">
+                                        <button type="submit" class="btn btn-success btn-sm">添加好友</button>
+                                    </form>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endif %}
+        {% elif user_list is none %}
+            <div class="alert alert-info mt-3">
+                未找到相关用户
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

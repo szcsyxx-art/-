@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 我的网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <h1>欢迎来到我的网站！</h1>
+        <p class="lead">Flask项目练习</p>
+        
+        <!-- 根据登录状态显示不同内容 -->
+        {% if session.get('current_user') %}
+            <div class="alert alert-success">
+                <h4>✅ 欢迎回来, {{ session.current_user }}！</h4>
+                <p>登录时间: {{ session.get('login_time', '刚刚') }}</p>
+            </div>
+            <div class="mt-4">
+                <a href="/profile" class="btn btn-primary btn-lg me-3">个人资料</a>
+                <a href="/logout" class="btn btn-outline-danger btn-lg">退出登录</a>
+            </div>
+        {% else %}
+            <div class="mt-5">
+                <a href="/login" class="btn btn-primary btn-lg me-3">登录</a>
+                <a href="/register" class="btn btn-outline-primary btn-lg">注册</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!--分隔行-->
+    <h3></h3>
+    <div class="col-md-10 text-center">
+        <h5>回声洞</h5>
+        <h6 id="echocave-content">{{ echocave }}</h6>
+        <div class="mt-4">
+            <button id="refresh-btn" class="btn btn-primary">换一条</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 从后端获取所有回声洞内容
+var allEchocaves = {{ all_echocaves | tojson }};
+
+// 随机选择一条回声洞
+function getRandomEchocave() {
+    if (allEchocaves.length === 0) return "暂无内容";
+    var randomIndex = Math.floor(Math.random() * allEchocaves.length);
+    return allEchocaves[randomIndex];
+}
+
+// 刷新回声洞内容（不刷新页面）
+function refreshEchocave() {
+    document.getElementById('echocave-content').textContent = getRandomEchocave();
+}
+
+// 页面加载完成后绑定事件
+document.addEventListener('DOMContentLoaded', function() {
+    var refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', refreshEchocave);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}注册成功 - 我的网站{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 text-center">
+        <h1>🎉 注册成功！</h1>
+        <div class="alert alert-success mt-4">
+            <h4>{{ userinfo }}</h4>
+        </div>
+        <div class="mt-4">
+            <a href="/login" class="btn btn-primary btn-lg">立即登录</a>
+            <a href="/" class="btn btn-outline-primary btn-lg">返回首页</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
